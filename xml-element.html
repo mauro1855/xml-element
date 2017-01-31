@@ -1,0 +1,65 @@
+<!--bower elements-->
+<link rel="import" href="../polymer/polymer.html">
+<link href="../xml_display/XMLDisplay.css" rel="stylesheet" async>
+
+<!--scripts-->
+<script src="../jquery/dist/jquery.min.js"></script>
+<script src="../xml_display/XMLDisplay.js" async></script>
+
+<dom-module id="xml-element">
+  <template>
+    <style>
+      :host {
+        width: 100%;
+        height: 100%
+      }
+    </style>
+
+    <div id="XMLViewer"></div>
+
+  </template>
+  <script>
+
+    Polymer({
+      is: 'xml-element',
+      properties: {
+
+        file: {
+          type: String,
+          value: null,
+          observer: 'fileChanged'
+        }
+      },
+
+      /**
+       * Observer for changes in the file url/path
+       * Loads the xml
+       * @return void
+       */
+      fileChanged: function(){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            LoadXMLString('XMLViewer', this.response);
+          }
+        };
+        xmlhttp.open("GET", this.file, true);
+        xmlhttp.send();
+      },
+
+      /**
+       * Force reload content by adding a parameter that will
+       * trigger a new download of the content
+       * @return void
+       */
+      loadContent: function() {
+        if(this.file)
+          if(this.file.indexOf("?") > -1)
+            this.file = this.file.substring(0, this.file.indexOf("?")+1) + new Date().getTime();
+          else
+            this.file = this.file + "?" + new Date().getTime();
+      }
+
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../bower_components/test-fixture/test-fixture.html">
+  <link rel="import" href="../bower_components/iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../elements/xml-element.html?v=${version}">
+  <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+
+
+  <title>XML element test</title>
+</head>
+<body>
+<test-fixture id="element">
+  <template>
+    <xml-element></xml-element>
+  </template>
+</test-fixture>
+
+<script>
+
+  suite('xml-element tests', function(){
+
+    var element;
+    var file = "resources/test.xml";
+
+    setup(function() {
+      // Recreates content-viewer for each test
+      // Replaces the pdf-element with a fake one
+      // and sets a default file for the viewer
+      // as well as default supportedExtensions
+      element = fixture('element');
+      element.file = file;
+
+    });
+
+    test('XML is fetched', function(done){
+      // tests that when the file is an XML, the method to fetch it is called
+
+      // stubs the fetchAndShowXMLString method so it finishes the test
+      stub('xml-element', {
+        fileChanged: function(){
+          done();
+        }
+      });
+
+      element.mimetype = "application/xml";
+      element.file = "test.xml";
+
+    });
+
+
+    test('loadContent forces content to load', function(done){
+      // test that loadContent() introduces versioning on the file to be loaded and that the version
+      // is different every time
+      element.loadContent();
+      expect(element.file).to.have.string("?");
+
+      var checkVersion = function(){ return element.file.substr(element.file.lastIndexOf("?")) };
+      var generatedVersion = checkVersion();
+
+      console.log(element.file);
+
+      // workaround for IE: IE javascript engine seems to be too fast
+      // and the new Date().getTime() method on the second loadContent() returns
+      // the same as the first one.
+      // Timeout of at least 1 ms required
+      setTimeout(function() {
+        element.loadContent();
+        console.log(element.file);
+        expect(generatedVersion).to.be.not.equal(checkVersion());
+        done();
+      }, 2);
+    });
+
+  });
+
+</script>
+
+</body>
+</html>
